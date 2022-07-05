@@ -1,23 +1,24 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 public class Main {
     public static void main(String[] args) {
-        try (FileOutputStream file = new FileOutputStream("test.txt");) {
-            String test = "i've checked your tests";
-            file.write(test.getBytes());
+        try (RandomAccessFile file = new RandomAccessFile("test.txt", "rw");) {
+            for (int i = 0; i < 1000000000; i++) {
+                file.write("If you need Random Access, you need RandomAccessFile".getBytes());
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        try (FileOutputStream file2 = new FileOutputStream("test2.txt");
-             FileInputStream file1 = new FileInputStream("test.txt");) {
-            int byteNumber;
-            ArrayList<Integer> array = new ArrayList<>();
-            while ((byteNumber = file1.read()) != -1) {
-                array.add(byteNumber);
-            }
-            for (int i = array.size()-1; i >= 0; i--) {
-                file2.write(array.get(i));
+        try (RandomAccessFile file = new RandomAccessFile("test.txt", "rw");
+             RandomAccessFile file2 = new RandomAccessFile("test2.txt", "rw");) {
+            long position = file.length();
+            while (position > 0) {
+                position -= 1;
+                file.seek(position);
+                byte b = file.readByte();
+                file2.write(b);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
